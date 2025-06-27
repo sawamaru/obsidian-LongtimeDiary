@@ -2,186 +2,167 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Set
 declare const moment: typeof import('moment');
 import { getDailyNoteSettings, getAllDailyNotes } from "obsidian-daily-notes-interface";
 
-// Remember to rename these classes and interfaces!
 
-interface MyPluginSettings {
+interface LongtimeDiarySettings {
 	mySetting: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+
+const DEFAULT_SETTINGS: LongtimeDiarySettings = {
 	mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+
+export default class LongtimeDiary extends Plugin {
+	settings: LongtimeDiarySettings;
 
 	async onload() {
 		await this.loadSettings();
 		const DailyNoteSettings = getDailyNoteSettings();
 		const DailyNoteFormat = DailyNoteSettings.format;
-		const activeFile = this.app.workspace.getActiveFile();
-		const activeFileName = activeFile ? activeFile.name : "";
-		console.log("activeFileName:", activeFileName);
-		
+
 		this.registerMarkdownCodeBlockProcessor(
-		"sample",
-		async (source, element, context) => {
-			const file = this.app.vault.getAbstractFileByPath(context.sourcePath) as TFile;
-			const isDailyNote = file && moment(file.basename, DailyNoteFormat, true).isValid();
-			const container = element.createEl("div", { cls: "my-sample-block" });
-			if (isDailyNote) {
-				const MMDD = moment(file.basename, DailyNoteFormat).format("MM-DD");
-				const allDailyNotes = getAllDailyNotes();
-				const MMDD_files: TFile[] = [];
-				for (const dateUID in allDailyNotes) {
-					if (dateUID.slice(9, 14) === MMDD.format("MM-DD")) {
-						MMDD_files.push(allDailyNotes[dateUID]);
-					}
-				}
-				let markdownContent = `## LongTimeDiary Index\n`;
-				for (const f of MMDD_files) {
-					if (f.name === activeFileName) {
-						markdownContent += `- ${f.name}&nbsp;&nbsp;&nbsp;is current file.\n`
-					} else {
-						markdownContent += `- ${f.name}\n`;
-					}
-				}
-				markdownContent += `\n\n---\n\n`;
-				for (const f of MMDD_files) {
-					if (f.name === activeFileName) {
-						continue; // Skip the active file
-					}
-					const content = await this.app.vault.read(f);
-					markdownContent += `\n## 📅 ${f.basename}\n${content}\n`;
-				}
-				await MarkdownRenderer.render(
-					this.app,
-      				markdownContent,
-					container,
-					file.path,
-					this
-				);
-			} else {
-				container.innerText = `This is not a daily note.`;
+			"LongtimeDiary",
+			async (source, element, context) => {
+				await this.processLongtimeDiaryCodeBlock(source, element, context, this, DailyNoteFormat);
 			}
-		},
 		);
 
-/*
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!!!!!');
-		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
-
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
-
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			}
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
-			}
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
+/*		this.registerEvent(
+			this.app.workspace.on("active-leaf-change", (leaf) => {
+				// leaf.viewがMarkdownViewかどうかチェック
+				if (leaf && leaf.view instanceof MarkdownView && leaf.view.file) {
+					const activeFile = leaf.view.file;
+					const activeFileName = activeFile.name;
+					console.log("active-leaf-change:", activeFileName);
+				} else {
+					// 何も開いていない場合もある
+					console.log("NO active-leaf-change: No active file or not a Markdown view.");
 				}
-			}
-		});
+			})
+		);*/
+	}
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
+	
+	async processLongtimeDiaryCodeBlock(
+		source: string,
+		element: HTMLElement,
+		context: any,
+		plugin: LongtimeDiary,
+		DailyNoteFormat: string | undefined,
+	) {
+		const activeFile = this.app.vault.getAbstractFileByPath(context.sourcePath) as TFile;
+		const container = element.createEl("div", { cls: "LongtimeDiary-block" });
 
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-*/
+		// 1. デイリーノート判定
+		const isDailyNote = activeFile && moment(activeFile.basename, DailyNoteFormat, true).isValid();
+		if (!isDailyNote) {
+			container.innerText = `This is not a daily note.`;
+			return;
 		}
+
+		const MMDD = moment(activeFile.basename, DailyNoteFormat).format("MM-DD");
+		const foundPaths = new Set<string>();
+
+		// 2. MM-DD一致するDailyNotes抽出
+		const MMDD_Dailyfiles = this.getMMDDDailyNotes(MMDD, foundPaths);
+
+		// 3. MM-DD一致する作成日ファイル抽出
+		const MMDD_CreatedMMDD_files = this.getMMDDCreatedFiles(MMDD, foundPaths);
+
+		// 4. markdownContent作成
+		let markdownContent = `## LongTimeDiary Index\n`;
+		markdownContent += `\n### 📅 Daily Notes for ${MMDD}\n\n`;
+		markdownContent += this.buildIndexList(MMDD_Dailyfiles, activeFile);
+
+		markdownContent += `\n### ⏲️ Created on ${MMDD}\n\n`;
+		if (MMDD_CreatedMMDD_files.length >= 10) {
+			markdownContent += "**⚠️ 表示は10件までです。**\n\n";
+		}
+		markdownContent += this.buildIndexList(MMDD_CreatedMMDD_files);
+
+		markdownContent += `\n\n---\n\n`;
+		markdownContent += await this.buildNoteContent(MMDD_Dailyfiles, "📅", activeFile);
+
+		markdownContent += `\n\n---\n\n`;
+		markdownContent += await this.buildNoteContent(MMDD_CreatedMMDD_files, "⏲️");
+
+		// 5. レンダリング
+		await MarkdownRenderer.render(
+			this.app,
+			markdownContent,
+			container,
+			activeFile.path,
+			this
+		);
+	}
+
+/** MM-DD一致するDailyNotesリスト取得 + ソート + foundPathsに追加 */
+private getMMDDDailyNotes(MMDD: string, foundPaths: Set<string>): TFile[] {
+    const allDailyNotes = getAllDailyNotes();
+    const result: TFile[] = [];
+    for (const dateUID in allDailyNotes) {
+        if (dateUID.slice(9, 14) === MMDD) {
+            const file = allDailyNotes[dateUID];
+            result.push(file);
+            foundPaths.add(file.path);
+        }
+    }
+    result.sort((a, b) => b.name.localeCompare(a.name));
+    return result;
+}
+
+/** MM-DD一致する作成日ファイルリスト取得 + ソート + foundPathsに追加 */
+private getMMDDCreatedFiles(MMDD: string, foundPaths: Set<string>): TFile[] {
+    const allFiles = this.app.vault.getFiles();
+    const result: TFile[] = [];
+    for (const file of allFiles) {
+        if (foundPaths.has(file.path)) continue;
+        if (file.extension !== "md") continue;
+        const CreatedMMDD = moment(file.stat.ctime).format("MM-DD");
+        if (CreatedMMDD === MMDD) {
+            result.push(file);
+            foundPaths.add(file.path);
+			if (result.length >= 10) break; // 100件上限
+        }
+    }
+    result.sort((a, b) => b.stat.ctime - a.stat.ctime);
+    return result;
+}
+
+/** インデックスリスト（箇条書き）の生成 */
+private buildIndexList(files: TFile[], activeFile?: TFile): string {
+    return files
+        .map(f => (activeFile && f.name === activeFile.name)
+            ? `- ${f.name}&nbsp;&nbsp;&nbsp;is current file.\n`
+            : `- ${f.name}\n`)
+        .join('');
+}
+
+/** ノート内容を見出し付きでまとめる（非同期） */
+private async buildNoteContent(files: TFile[], headerEmoji: string, skipFile?: TFile): Promise<string> {
+    let content = "";
+    for (const f of files) {
+        if (skipFile && f.name === skipFile.name) continue;
+        const fileContent = await this.app.vault.read(f);
+        content += `\n## ${headerEmoji} ${f.basename}\n${fileContent}\n`;
+    }
+    return content;
+}
+
 
 	onunload() {
 
 	}
 
+
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 
+
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
-}
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
-	}
-}
-
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
-
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const {containerEl} = this;
-
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
 }
