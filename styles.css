@@ -1,0 +1,18 @@
+/*
+
+This CSS file will be included with your plugin, and
+available in the app when your plugin is enabled.
+
+If your plugin does not need CSS, delete this file.
+
+*/
+
+.my-sample-block {
+  /*background: #f0f8ff;*/
+  border: 2px solid #49a;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  /*color: #246;*/
+  margin: 8px 0;
+}
