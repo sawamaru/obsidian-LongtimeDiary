@@ -8,11 +8,9 @@ If your plugin does not need CSS, delete this file.
 */
 
 .LongtimeDiary-block {
-  /*background: #f0f8ff;*/
-  border: 2px solid #49a;
+  /* border: 2px solid #49a; */
   padding: 12px;
-  border-radius: 8px;
-  font-size: 0.9em;
-  /*color: #246;*/
+  border-radius: 5px;
+  /* font-size: 0.9em; */
   margin: 8px 0;
 }
