@@ -1,0 +1,16 @@
+/*
+
+This CSS file will be included with your plugin, and
+available in the app when your plugin is enabled.
+
+If your plugin does not need CSS, delete this file.
+
+*/
+
+.LongtimeDiary-block {
+  /* border: 2px solid #49a; */
+  padding: 12px;
+  border-radius: 5px;
+  /* font-size: 0.9em; */
+  margin: 8px 0;
+}
