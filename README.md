@@ -6,7 +6,7 @@ By adding a specific code block to the DailyNote, this plugin will search and di
 This plugin is a must-have for long-time diary keepers on Obsidian.
 
 ## Installation
-
+In the process of applying.
 1. Find the under "LongtimeDialy" in the community plugins list in Obsidian
 2. Click "Install" and "Enable"
 
@@ -18,4 +18,9 @@ If you put it in other than the DailyNote, it will not work.
 > &#96;&#96;&#96;LongtimeDiary  
 > &#96;&#96;&#96;
 
+I recommend that you include this code block in your DailyNote template.
+
 ![Explanatory Video](ExplanatoryVideo.gif)
+
+## License
+This project is licensed under the MIT License.
