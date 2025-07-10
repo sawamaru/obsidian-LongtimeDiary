@@ -24,8 +24,8 @@ export default class LongtimeDiary extends Plugin {
 */
 		const DailyNoteSettings = getDailyNoteSettings();
 		const DailyNoteFormat = DailyNoteSettings.format;
-		this.accentColor = getComputedStyle(document.body).getPropertyValue('--text-accent').trim() || "#49a";
-
+/*		this.accentColor = getComputedStyle(document.body).getPropertyValue('--text-accent').trim() || "#49a";
+*/
 		this.registerMarkdownCodeBlockProcessor(
 			"LongtimeDiary",
 			async (source, element, context) => {
@@ -43,9 +43,15 @@ export default class LongtimeDiary extends Plugin {
 		plugin: LongtimeDiary,
 		DailyNoteFormat: string | undefined,
 	) {
-		const activeFile = this.app.vault.getAbstractFileByPath(context.sourcePath) as TFile;
+		const abstractFile = this.app.vault.getAbstractFileByPath(context.sourcePath);
+		if (!(abstractFile instanceof TFile)) {
+			const container = element.createEl("div", { cls: "LongtimeDiary-block" });
+			container.innerText = `This file is not a file.\nThe LongtimeDiary block must be described in a Daily Note file.`;
+			return;
+		}
+		const activeFile = abstractFile;
+		
 		const container = element.createEl("div", { cls: "LongtimeDiary-block" });
-		container.style.border = `1px solid ${this.accentColor}`;
 		
 		// 1. デイリーノート判定
 		const isDailyNote = activeFile && moment(activeFile.basename, DailyNoteFormat, true).isValid();
@@ -75,7 +81,7 @@ export default class LongtimeDiary extends Plugin {
 		let markdownContent = '';
 
 		// ▼ 折りたたみヘッダー
-		markdownContent += `<div class="ltd-toggle-header" style="cursor:pointer; font-weight:bold;">▼ LongtimeDiary Index</div>\n`;
+		markdownContent += `<div class="ltd-toggle-header">▼ LongtimeDiary Index</div>\n`;
 
 		// ▼ 折りたたみ対象コンテンツ
 		markdownContent += `<div class="ltd-toggle-content">\n`;
@@ -116,7 +122,7 @@ export default class LongtimeDiary extends Plugin {
 			let isCollapsed = false;
 			toggleHeader.addEventListener('click', () => {
 				isCollapsed = !isCollapsed;
-				toggleContent.style.display = isCollapsed ? 'none' : 'block';
+				toggleContent.classList.toggle('is-collapsed', isCollapsed);
 				toggleHeader.innerText = isCollapsed ? '▶ LongtimeDiary Index' : '▼ LongtimeDiary Index';
 			});
 			// 初期表示状態
@@ -268,11 +274,11 @@ export default class LongtimeDiary extends Plugin {
 			let fileContent = await this.app.vault.read(f);
 			// ▼▼▼ LongtimeDiaryコードブロックを検出・置換 ▼▼▼
 			// コードブロック（```LongtimeDiary ... ```）を全て検出して置換
-			fileContent = fileContent.replace(/```LongtimeDiary[\s\S]*?```/gi, '⚠️ <span style="color: gray;">LongtimeDiary block skipped (recursive render prevented)</span>');
+			fileContent = fileContent.replace(/```LongtimeDiary[\s\S]*?```/gi, '<span class="ltd-skipped">⚠️ LongtimeDiary block skipped (recursive render prevented)</span>');
 			const anchorId = this.generateAnchorId(f);
 			// content += `\n<h3 id="${anchorId}">${headerEmoji} ${f.basename}</h3>\n\n${fileContent}\n`;
 			const noteLinkId = `longtime-diary-open-link-${anchorId}`;
-			content += `\n<h3 id="${anchorId}">${headerEmoji} ${f.basename} <a href="#" data-file-path="${f.path}" id="${noteLinkId}" style="font-size:0.8em;">[↗]</a></h3>\n\n${fileContent}\n`;
+			content += `\n<h3 id="${anchorId}">${headerEmoji} ${f.basename} <a href="#" data-file-path="${f.path}" id="${noteLinkId}" class="ltd-external-link">[↗]</a></h3>\n\n${fileContent}\n`;
 			
 		}
 		return content;
