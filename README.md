@@ -6,9 +6,10 @@ By adding a specific code block to the DailyNote, this plugin will search and di
 This plugin is a must-have for long-time diary keepers on Obsidian.
 
 ## Installation
-In the process of applying.
-1. Find the under "LongtimeDialy" in the community plugins list in Obsidian
-2. Click "Install" and "Enable"
+In the process of applying.  
+Those who wish to use it ahead of time should install it using [BRAT](https://github.com/TfTHacker/obsidian42-brat).
+1. ~~Find the under "LongtimeDialy" in the community plugins list in Obsidian~~
+2. ~~Click "Install" and "Enable"~~
 
 ## Usage
 
