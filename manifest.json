@@ -1,11 +1,10 @@
 {
-	"id": "obsidian-LongtimeDiary",
+	"id": "LongtimeDiary",
 	"name": "LongtimeDiary",
 	"version": "0.9.1",
 	"minAppVersion": "1.8.0",
 	"description": "Show past DailyNotes on the same day in previous years.",
 	"author": "sawamaru",
 	"authorUrl": "https://github.com/sawamaru",
-	"main": "main.js",
 	"isDesktopOnly": false
 }
