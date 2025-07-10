@@ -1,7 +1,7 @@
 {
 	"id": "longtime-diary",
 	"name": "LongtimeDiary",
-	"version": "0.9.1",
+	"version": "0.9.2",
 	"minAppVersion": "1.8.0",
 	"description": "Show past DailyNotes on the same day in previous years.",
 	"author": "sawamaru",
