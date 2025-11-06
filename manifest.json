@@ -6,6 +6,5 @@
 	"description": "Show past DailyNotes on the same day in previous years.",
 	"author": "sawamaru",
 	"authorUrl": "https://x.com/sawamaru",
-	"isDesktopOnly": false,
-	"main": "main.js"
+	"isDesktopOnly": false
 }
