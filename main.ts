@@ -1,5 +1,9 @@
-import { MarkdownView, Plugin, PluginSettingTab, Setting, TFile, MarkdownRenderer, MarkdownRenderChild } from 'obsidian';
-declare const moment: typeof import('moment');
+import {
+	MarkdownView, MarkdownRenderer, MarkdownRenderChild, MarkdownPostProcessorContext,
+	Plugin, PluginSettingTab, Setting,
+	TFile,
+	moment,
+} from 'obsidian';
 import { getDailyNoteSettings, getAllDailyNotes } from "obsidian-daily-notes-interface";
 
 
@@ -28,8 +32,8 @@ export default class LongtimeDiary extends Plugin {
 */
 		this.registerMarkdownCodeBlockProcessor(
 			"LongtimeDiary",
-			async (source, element, context) => {
-				await this.processLongtimeDiaryCodeBlock(source, element, context, this, DailyNoteFormat);
+			async (source: string, element: HTMLElement, context: MarkdownPostProcessorContext) => {
+				await this.processLongtimeDiaryCodeBlock(source, element, context, DailyNoteFormat);
 			}
 		);
 
@@ -39,8 +43,7 @@ export default class LongtimeDiary extends Plugin {
 	async processLongtimeDiaryCodeBlock(
 		source: string,
 		element: HTMLElement,
-		context: any,
-		plugin: LongtimeDiary,
+		context: MarkdownPostProcessorContext,
 		DailyNoteFormat: string | undefined,
 	) {
 		const abstractFile = this.app.vault.getAbstractFileByPath(context.sourcePath);
@@ -67,11 +70,11 @@ export default class LongtimeDiary extends Plugin {
 		const MMDD_Dailyfiles = this.getMMDDDailyNotes(MMDD, foundPaths);
 
 		// 3. MM-DD一致する作成日ファイル抽出
-		const allCreatedFiles = this.getMMDDCreatedFiles(MMDD, foundPaths);
+//		const allCreatedFiles = this.getMMDDCreatedFiles(MMDD, foundPaths);
 		
-		const limit = this.settings.createdFilesLimit;
-		const hasMore = allCreatedFiles.length > limit;
-		const MMDD_CreatedMMDD_files = hasMore ? allCreatedFiles.slice(0, limit) : allCreatedFiles;
+//		const limit = this.settings.createdFilesLimit;
+//		const hasMore = allCreatedFiles.length > limit;
+//		const MMDD_CreatedMMDD_files = hasMore ? allCreatedFiles.slice(0, limit) : allCreatedFiles;
 		
 		// `foundPaths` に追加 (getMMDDCreatedFiles内ではやらなくなったため)
 		// MMDD_CreatedMMDD_files.forEach(file => foundPaths.add(file.path));
@@ -81,7 +84,7 @@ export default class LongtimeDiary extends Plugin {
 		let markdownContent = '';
 
 		// ▼ 折りたたみヘッダー
-		markdownContent += `<div class="ltd-toggle-header">▼ LongtimeDiary Index</div>\n`;
+		markdownContent += `<div class="ltd-toggle-header">▼ LongtimeDiary</div>\n`;
 
 		// ▼ 折りたたみ対象コンテンツ
 		markdownContent += `<div class="ltd-toggle-content">\n`;
@@ -107,12 +110,15 @@ export default class LongtimeDiary extends Plugin {
 
 
 		// 5. レンダリング
+		const tempComponent = new MarkdownRenderChild(container);
+		context.addChild(tempComponent);
+
 		await MarkdownRenderer.render(
 			this.app,
 			markdownContent,
 			container,
 			activeFile.path,
-			this
+			tempComponent
 		);
 
 		// 折りたたみ動作の設定
@@ -123,7 +129,7 @@ export default class LongtimeDiary extends Plugin {
 			toggleHeader.addEventListener('click', () => {
 				isCollapsed = !isCollapsed;
 				toggleContent.classList.toggle('is-collapsed', isCollapsed);
-				toggleHeader.innerText = isCollapsed ? '▶ LongtimeDiary Index' : '▼ LongtimeDiary Index';
+				toggleHeader.innerText = isCollapsed ? '▶ LongtimeDiary' : '▼ LongtimeDiary';
 			});
 			// 初期表示状態
 			toggleHeader.innerText = '▼ LongtimeDiary';
@@ -181,36 +187,27 @@ export default class LongtimeDiary extends Plugin {
 		container.querySelectorAll('a[data-file-path]').forEach(link => {
 			link.addEventListener('click', async (e) => {
 				e.preventDefault();
+
 				const filePath = (link as HTMLElement).getAttribute('data-file-path');
-				if (filePath) {
-					const file = this.app.vault.getAbstractFileByPath(filePath);
-					if (file instanceof TFile) {
-						const leaf = this.app.workspace.getLeaf();
-						leaf.openFile(file);
-					}
-				}
+				if (!filePath) return;
+
+				const file = this.app.vault.getAbstractFileByPath(filePath);
+				if (!(file instanceof TFile)) return;
+
+				// ここだけで「どう開くか」を決める
+				const leaf = this.app.workspace.getLeaf(false);
+				await leaf.openFile(file, { active: false });
 			});
 		});
 
-		container.querySelectorAll('a[data-file-path]').forEach(link => {
-	link.addEventListener('click', async (e) => {
-		e.preventDefault();
-		const filePath = (link as HTMLElement).getAttribute('data-file-path');
-		if (filePath) {
-			const file = this.app.vault.getAbstractFileByPath(filePath);
-			if (file instanceof TFile) {
-				// 現在のペイン（leaf）と同じ場所に「非アクティブ」なタブを追加
-				const leaf = this.app.workspace.   getLeaf(false); // split=false で既存のleaf
-				leaf.openFile(file, { active: false }); // active:false で非アクティブタブ
-			}
-		}
-	});
-});
 		// 7. レンダリング後のクリーンアップ処理
-		const child = new MarkdownRenderChild(container);
-		context.addChild(child);
-		child.onunload = () => {
-			// このブロックが破棄されるタイミングでクリーンアップ処理を実行
+//		const child = new MarkdownRenderChild(container);
+//		context.addChild(child);
+//		child.onunload = () => {
+//			// このブロックが破棄されるタイミングでクリーンアップ処理を実行
+//			delete LongtimeDiary.renderdFileRecord[activeFile.path];
+//		};
+		tempComponent.onunload = () => {
 			delete LongtimeDiary.renderdFileRecord[activeFile.path];
 		};
 
