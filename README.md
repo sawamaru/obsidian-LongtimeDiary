@@ -1,8 +1,8 @@
 # "LongtimeDiary" for Obsidian
 
-This is a Obsidian plugin for helping you to look back on past on this day in the Daily Note.
+This is a Obsidian plugin for helping you to look back on past on this day in the Daily note.
 
-By adding a specific code block to the Daily Note, this plugin will search and display the Daily Note for the same day of the month as the Daily Note date.  
+By adding a specific code block to the Daily note, this plugin will search and display the Daily note for the same day of the month as the Daily note date.  
 This plugin is a must-have for long-time diary keepers on Obsidian.
 
 ## Installation
@@ -13,13 +13,13 @@ Those who wish to use it ahead of time should install it using [BRAT](https://gi
 
 ## Usage
 
-Please write the following code block in the Daily Note.  
-If you put it in other than the Daily Note, it will not work.
+Please write the following code block in the Daily note.  
+If you put it in other than the Daily note, it will not work.
 
 > &#96;&#96;&#96;LongtimeDiary  
 > &#96;&#96;&#96;
 
-I recommend that you include this code block in your Daily Note template.
+I recommend that you include this code block in your Daily note template.
 
 ![Explanatory Video](ExplanatoryVideo.gif)
 

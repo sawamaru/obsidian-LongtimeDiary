@@ -3,7 +3,7 @@
 	"name": "LongtimeDiary",
 	"version": "0.9.3",
 	"minAppVersion": "1.8.0",
-	"description": "Show past Daily Notes on the same day in previous years.",
+	"description": "Show past Daily notes on the same day in previous years.",
 	"author": "sawamaru",
 	"authorUrl": "https://x.com/sawamaru",
 	"isDesktopOnly": false
