@@ -1,6 +1,7 @@
 import {
 	MarkdownView, MarkdownRenderer, MarkdownRenderChild, MarkdownPostProcessorContext,
-	Plugin, PluginSettingTab, Setting,
+	Plugin,
+/*	PluginSettingTab, Setting, */
 	TFile,
 	moment,
 } from 'obsidian';
@@ -49,7 +50,7 @@ export default class LongtimeDiary extends Plugin {
 		const abstractFile = this.app.vault.getAbstractFileByPath(context.sourcePath);
 		if (!(abstractFile instanceof TFile)) {
 			const container = element.createEl("div", { cls: "LongtimeDiary-block" });
-			container.innerText = `This file is not a file.\nThe LongtimeDiary block must be described in a Daily Note file.`;
+			container.innerText = `This file is not a file.\nThe Longtime Diary block must be described in a Daily Note file.`;
 			return;
 		}
 		const activeFile = abstractFile;
@@ -59,7 +60,7 @@ export default class LongtimeDiary extends Plugin {
 		// 1. デイリーノート判定
 		const isDailyNote = activeFile && moment(activeFile.basename, DailyNoteFormat, true).isValid();
 		if (!isDailyNote) {
-			container.innerText = `This file is not a Daily Note.\nThe LongtimeDiary block must be described in a Daily Note.`;
+			container.innerText = `This file is not a Daily Note.\nThe Longtime Diary block must be described in a Daily Note.`;
 			return;
 		}
 
@@ -84,7 +85,7 @@ export default class LongtimeDiary extends Plugin {
 		let markdownContent = '';
 
 		// ▼ 折りたたみヘッダー
-		markdownContent += `<div class="ltd-toggle-header">▼ LongtimeDiary</div>\n`;
+		markdownContent += `<div class="ltd-toggle-header">▼ Longtime Diary</div>\n`;
 
 		// ▼ 折りたたみ対象コンテンツ
 		markdownContent += `<div class="ltd-toggle-content">\n`;
@@ -129,10 +130,10 @@ export default class LongtimeDiary extends Plugin {
 			toggleHeader.addEventListener('click', () => {
 				isCollapsed = !isCollapsed;
 				toggleContent.classList.toggle('is-collapsed', isCollapsed);
-				toggleHeader.innerText = isCollapsed ? '▶ LongtimeDiary' : '▼ LongtimeDiary';
+				toggleHeader.innerText = isCollapsed ? '▶ Longtime Diary' : '▼ Longtime Diary';
 			});
 			// 初期表示状態
-			toggleHeader.innerText = '▼ LongtimeDiary';
+			toggleHeader.innerText = '▼ Longtime Diary';
 		}
 
 		// 6. アンカーリンクのクリックイベントを設定
@@ -185,18 +186,16 @@ export default class LongtimeDiary extends Plugin {
 
 		// ノートを新規タブ（ペイン）で開くリンクにイベントリスナーを設定
 		container.querySelectorAll('a[data-file-path]').forEach(link => {
-			link.addEventListener('click', async (e) => {
+			link.addEventListener('click', (e) => {
 				e.preventDefault();
-
-				const filePath = (link as HTMLElement).getAttribute('data-file-path');
-				if (!filePath) return;
-
-				const file = this.app.vault.getAbstractFileByPath(filePath);
-				if (!(file instanceof TFile)) return;
-
-				// ここだけで「どう開くか」を決める
-				const leaf = this.app.workspace.getLeaf(false);
-				await leaf.openFile(file, { active: false });
+				void (async () => {
+					const filePath = (link as HTMLElement).getAttribute('data-file-path');
+					if (!filePath) return;
+					const file = this.app.vault.getAbstractFileByPath(filePath);
+					if (!(file instanceof TFile)) return;
+					const leaf = this.app.workspace.getLeaf(false);
+					await leaf.openFile(file, { active: false });
+				})();
 			});
 		});
 
