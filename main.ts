@@ -50,7 +50,7 @@ export default class LongtimeDiary extends Plugin {
 		const abstractFile = this.app.vault.getAbstractFileByPath(context.sourcePath);
 		if (!(abstractFile instanceof TFile)) {
 			const container = element.createEl("div", { cls: "LongtimeDiary-block" });
-			container.innerText = `This file is not a file.\nThe Longtime Diary block must be described in a Daily Note file.`;
+			container.innerText = `This file is not a file.\nThe Longtime diary block must be described in a Daily note file.`;
 			return;
 		}
 		const activeFile = abstractFile;
@@ -60,7 +60,7 @@ export default class LongtimeDiary extends Plugin {
 		// 1. デイリーノート判定
 		const isDailyNote = activeFile && moment(activeFile.basename, DailyNoteFormat, true).isValid();
 		if (!isDailyNote) {
-			container.innerText = `This file is not a Daily Note.\nThe Longtime Diary block must be described in a Daily Note.`;
+			container.innerText = `This file is not a Daily Note.\nThe Longtime diary block must be described in a Daily note.`;
 			return;
 		}
 
@@ -85,7 +85,7 @@ export default class LongtimeDiary extends Plugin {
 		let markdownContent = '';
 
 		// ▼ 折りたたみヘッダー
-		markdownContent += `<div class="ltd-toggle-header">▼ Longtime Diary</div>\n`;
+		markdownContent += `<div class="ltd-toggle-header">▼ Longtime diary</div>\n`;
 
 		// ▼ 折りたたみ対象コンテンツ
 		markdownContent += `<div class="ltd-toggle-content">\n`;
@@ -130,10 +130,10 @@ export default class LongtimeDiary extends Plugin {
 			toggleHeader.addEventListener('click', () => {
 				isCollapsed = !isCollapsed;
 				toggleContent.classList.toggle('is-collapsed', isCollapsed);
-				toggleHeader.innerText = isCollapsed ? '▶ Longtime Diary' : '▼ Longtime Diary';
+				toggleHeader.innerText = isCollapsed ? '▶ Longtime diary' : '▼ Longtime diary';
 			});
 			// 初期表示状態
-			toggleHeader.innerText = '▼ Longtime Diary';
+			toggleHeader.innerText = '▼ Longtime diary';
 		}
 
 		// 6. アンカーリンクのクリックイベントを設定
