@@ -50,7 +50,7 @@ export default class LongtimeDiary extends Plugin {
 		const abstractFile = this.app.vault.getAbstractFileByPath(context.sourcePath);
 		if (!(abstractFile instanceof TFile)) {
 			const container = element.createEl("div", { cls: "LongtimeDiary-block" });
-			container.innerText = `This file is not a valid note.\nThe longtime diary block must be described in a daily note file.`;
+			container.innerText = `This file is not a valid note.` + `\n` + `The longtime diary block must be described in a daily note file.`;
 			return;
 		}
 		const activeFile = abstractFile;
@@ -60,7 +60,7 @@ export default class LongtimeDiary extends Plugin {
 		// 1. デイリーノート判定
 		const isDailyNote = activeFile && moment(activeFile.basename, DailyNoteFormat, true).isValid();
 		if (!isDailyNote) {
-			container.innerText = `This file is not a daily note.\nThe longtime diary block must be placed in a daily note.`;
+			container.innerText = `This file is not a daily note.` + `\n` + `The longtime diary block must be placed in a daily note.`;
 			return;
 		}
 
