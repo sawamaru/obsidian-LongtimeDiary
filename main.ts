@@ -175,7 +175,7 @@ export default class LongtimeDiary extends Plugin {
 							});
 						} else {
 							// フォールバックとして、通常のscrollIntoViewをわずかに遅延させて実行
-							setTimeout(() => {
+							window.setTimeout(() => {
 								targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
 							}, 50);
 						}
